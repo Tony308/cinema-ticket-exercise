@@ -57,7 +57,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     private void calculateTotal(int total) {
-        this.total = total;
+        this.total += total;
     }
 
     private void calculateSeats(int seats) {
