@@ -1,4 +1,4 @@
-package TicketServiceTestSuite;
+package TicketServiceTestSuite.unit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,8 +14,8 @@ import uk.gov.dwp.uc.pairtest.service.TicketServiceImpl;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
 public class TicketServiceTests {
     private TicketServiceImpl ticketService;
@@ -54,17 +54,41 @@ public class TicketServiceTests {
     @MethodSource(value = "data")
     public void givenTicketsThenReturnCorrectPrice(TicketTypeEnum type, int noTickets, int expectedTotal) {
         when(ticketPurchaseRequest.getTicketTypeRequests()).thenReturn(new TicketRequest[]{ticketRequest});
+
         when(ticketRequest.getTicketType()).thenReturn(type);
         when(ticketRequest.getNoOfTickets()).thenReturn(noTickets);
         ticketService.purchaseTickets(ticketPurchaseRequest);
         assertEquals(expectedTotal, ticketService.getTotal());
     }
+
+
     @Test
-    public void givenTicketsThenReturnCorrectSeats() {
+    public void givenATicketThenReturnCorrectSeats() {
         when(ticketRequest.getTicketType()).thenReturn(TicketTypeEnum.ADULT);
         when(ticketRequest.getNoOfTickets()).thenReturn(1);
         when(ticketPurchaseRequest.getTicketTypeRequests()).thenReturn(new TicketRequest[]{ticketRequest});
         ticketService.purchaseTickets(ticketPurchaseRequest);
         assertEquals(1, ticketService.getNoSeats());
+    }
+
+    @Test
+    public void givenTicketsThenReturnCorrectSeats() {
+        when(ticketPurchaseRequest.getTicketTypeRequests()).thenReturn(new TicketRequest[]{
+                new TicketRequest(TicketTypeEnum.ADULT, 1),
+                new TicketRequest(TicketTypeEnum.CHILD, 1),
+                new TicketRequest(TicketTypeEnum.INFANT, 1)
+        });
+        ticketService.purchaseTickets(ticketPurchaseRequest);
+        assertEquals(2, ticketService.getNoSeats());
+    }
+    @Test
+    public void givenTicketsThenReturnCorrectSeats2() {
+        when(ticketPurchaseRequest.getTicketTypeRequests()).thenReturn(new TicketRequest[]{
+                new TicketRequest(TicketTypeEnum.ADULT, 5),
+                new TicketRequest(TicketTypeEnum.CHILD, 5),
+                new TicketRequest(TicketTypeEnum.INFANT, 5)
+        });
+        ticketService.purchaseTickets(ticketPurchaseRequest);
+        assertEquals(10, ticketService.getNoSeats());
     }
 }
