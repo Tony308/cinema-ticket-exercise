@@ -1,14 +1,20 @@
 package uk.gov.dwp.uc.pairtest.domain;
 
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 /**
  * Should be an Immutable Object
  */
 public class TicketRequest {
 
-    private int noOfTickets;
-    private Type type;
+    @Min(1)
+    private final int noOfTickets;
+    @NotNull
+    private final TicketTypeEnum type;
 
-    public TicketRequest(Type type, int noOfTickets) {
+    public TicketRequest(TicketTypeEnum type, int noOfTickets) {
         this.type = type;
         this.noOfTickets = noOfTickets;
     }
@@ -17,12 +23,8 @@ public class TicketRequest {
         return noOfTickets;
     }
 
-    public Type getTicketType() {
+    public TicketTypeEnum getTicketType() {
         return type;
-    }
-
-    public enum Type {
-        ADULT, CHILD , INFANT
     }
 
 }
