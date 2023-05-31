@@ -37,14 +37,18 @@ public class TicketServiceImpl implements TicketService {
 //         * 4. calculate seats
 //         * 5. process seatService
         TicketRequest[] requests = ticketPurchaseRequest.getTicketTypeRequests();
+
         Arrays.stream(requests).forEach(ticketRequest -> {
             int cost = getTicketPrice(ticketRequest.getTicketType());
             calculateTotal(cost * ticketRequest.getNoOfTickets());
-
+            //todo: 4. calculate seats after payment process
+            boolean requireSeats = !ticketRequest.getTicketType().equals(TicketTypeEnum.INFANT);
+            if (requireSeats) {
+                calculateSeats(ticketRequest.getNoOfTickets());
+            }
         });
+        //todo: 3. process payment
 
-        //todo: calculate seats after payment process
-        calculateSeats();
     }
 
     private int getTicketPrice(TicketTypeEnum type) {
@@ -56,8 +60,8 @@ public class TicketServiceImpl implements TicketService {
         this.total = total;
     }
 
-    private void calculateSeats() {
-        this.noSeats = -1;
+    private void calculateSeats(int seats) {
+        this.noSeats += seats;
     }
 
     public long getTotal() {
