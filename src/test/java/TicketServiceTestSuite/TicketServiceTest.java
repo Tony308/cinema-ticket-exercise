@@ -9,11 +9,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.dwp.uc.pairtest.domain.TicketPurchaseRequest;
 import uk.gov.dwp.uc.pairtest.domain.TicketRequest;
 import uk.gov.dwp.uc.pairtest.domain.TicketTypeEnum;
+import uk.gov.dwp.uc.pairtest.exception.InvalidTicketRequestException;
 import uk.gov.dwp.uc.pairtest.service.TicketServiceImpl;
 
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TicketServiceTest {
     private TicketServiceImpl ticketService;
@@ -23,8 +25,7 @@ public class TicketServiceTest {
     @BeforeEach
     public void setup() {
         ticketService = new TicketServiceImpl();
-        ticketRequest = new TicketRequest(TicketTypeEnum.ADULT, 1);
-        ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{ticketRequest});
+
     }
 
     @AfterEach
@@ -41,7 +42,7 @@ public class TicketServiceTest {
      * - Rejects any invalid ticket purchase requests. It is up to you to identify what should be deemed as an invalid purchase request.
      */
 
-    static Stream<Arguments> data() {
+    static Stream<Arguments> TicketRequestUnitTestData() {
         return Stream.of(
                 Arguments.of(TicketTypeEnum.ADULT, 1, 1, TicketTypeEnum.ADULT),
                 Arguments.of(TicketTypeEnum.ADULT, 2, 2, TicketTypeEnum.ADULT),
@@ -52,20 +53,38 @@ public class TicketServiceTest {
         );
     }
     @ParameterizedTest(name = "TicketTypeEnum: {0}, tickets:{1}, expected: {2}, {3}")
-    @MethodSource(value = "data")
-    public void givenTicketRequests(TicketTypeEnum type, int noOfTickets, int expectedTickets, TicketTypeEnum expectedType) {
+    @MethodSource(value = "TicketRequestUnitTestData")
+    public void givenTicketRequestsUnitTests(TicketTypeEnum type, int noOfTickets, int expectedTickets, TicketTypeEnum expectedType) {
         TicketRequest ticketRequest1 = new TicketRequest(type, noOfTickets);
         assertEquals(expectedTickets, ticketRequest1.getNoOfTickets());
         assertEquals(expectedType, ticketRequest1.getTicketType());
     }
 
+    static Stream<Arguments> TicketRequestUnitTestErrorData() {
+        return Stream.of(
+                Arguments.of(TicketTypeEnum.ADULT, 0, "Given invalid number of tickets then, throw InvalidTicketRequestException"),
+                Arguments.of(TicketTypeEnum.ADULT, -1, "Given invalid number of tickets then, throw InvalidTicketRequestException")
+        );
+    }
+    @ParameterizedTest(name = "TicketTypeEnum: {0}, tickets:{1}")
+    @MethodSource(value = "TicketRequestUnitTestErrorData")
+    public void givenTicketRequestsHandleErrors(TicketTypeEnum type, int noOfTickets, String message) {
+        assertThrows(InvalidTicketRequestException.class, () -> new TicketRequest(type, noOfTickets),
+                message);
+    }
+
+
     @Test
     public void givenTicketsThenReturnCorrectPrice() {
+        ticketRequest = new TicketRequest(TicketTypeEnum.ADULT, 1);
+        ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{ticketRequest});
         ticketService.purchaseTickets(ticketPurchaseRequest);
         assertEquals(20, ticketService.getTotal());
     }
     @Test
     public void givenTicketsThenReturnCorrectSeats() {
+        ticketRequest = new TicketRequest(TicketTypeEnum.ADULT, 1);
+        ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{ticketRequest});
         ticketService.purchaseTickets(ticketPurchaseRequest);
         assertEquals(1, ticketService.getNoSeats());
     }
