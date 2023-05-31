@@ -35,7 +35,8 @@ public class TicketRequestTests {
     static Stream<Arguments> TicketRequestUnitTestErrorData() {
         return Stream.of(
                 Arguments.of(TicketTypeEnum.ADULT, 0, "Given invalid number of tickets then, throw InvalidTicketRequestException"),
-                Arguments.of(TicketTypeEnum.ADULT, -1, "Given invalid number of tickets then, throw InvalidTicketRequestException")
+                Arguments.of(TicketTypeEnum.ADULT, -1, "Given invalid number of tickets then, throw InvalidTicketRequestException"),
+                Arguments.of(TicketTypeEnum.ADULT, -2, "Given invalid number of tickets then, throw InvalidTicketRequestException")
         );
     }
     @ParameterizedTest(name = "TicketTypeEnum: {0}, tickets:{1}")

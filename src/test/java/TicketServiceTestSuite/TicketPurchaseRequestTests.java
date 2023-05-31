@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.dwp.uc.pairtest.domain.TicketPurchaseRequest;
 import uk.gov.dwp.uc.pairtest.domain.TicketRequest;
+import uk.gov.dwp.uc.pairtest.domain.TicketTypeEnum;
 import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
 
 import java.util.stream.Stream;
@@ -41,14 +42,24 @@ public class TicketPurchaseRequestTests {
     }
     @ParameterizedTest(name = "AccountId: {0}")
     @MethodSource(value = "invalidAccountIdData")
-    public void givenInvalidAccountIdThenThrowError(int accountId) {
+    public void givenInvalidAccountIdThenThrowInvalidPurchaseException(int accountId) {
         assertThrows(InvalidPurchaseException.class, () -> {
             ticketPurchaseRequest = new TicketPurchaseRequest(accountId, new TicketRequest[]{ticketRequest});
         });
     }
 
     @Test
+    public void givenNoAdultTicketRequestThenThrowInvalidPurchaseException() {
+        assertThrows(InvalidPurchaseException.class, () -> {
+            when(ticketRequest.getTicketType()).thenReturn(TicketTypeEnum.CHILD);
+            ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{ticketRequest});
+        }, "No Adult ticket");
+    }
+
+
+    @Test
     public void givenValidInputThenCreateTicketPurchaseRequest() {
+        when(ticketRequest.getTicketType()).thenReturn(TicketTypeEnum.ADULT);
         ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{ticketRequest});
         assertEquals(1, ticketPurchaseRequest.getAccountId());
         assertEquals(1, ticketPurchaseRequest.getTicketTypeRequests().length);

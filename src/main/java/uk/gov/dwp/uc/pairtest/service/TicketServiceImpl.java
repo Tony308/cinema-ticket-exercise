@@ -1,6 +1,5 @@
 package uk.gov.dwp.uc.pairtest.service;
 
-import jakarta.validation.constraints.Min;
 import thirdparty.seatbooking.SeatReservationService;
 import uk.gov.dwp.uc.pairtest.domain.TicketPurchaseRequest;
 import uk.gov.dwp.uc.pairtest.domain.TicketRequest;
@@ -12,9 +11,8 @@ import java.util.Map;
 
 public class TicketServiceImpl implements TicketService {
 
-    @Min(0)
+
     private long total;
-    @Min(1)
     private int noSeats;
     private SeatReservationService seatReservationService;
     private TicketServiceImpl ticketService;
@@ -39,13 +37,10 @@ public class TicketServiceImpl implements TicketService {
 //         * 4. calculate seats
 //         * 5. process seatService
         TicketRequest[] requests = ticketPurchaseRequest.getTicketTypeRequests();
-        boolean notValidTickets = Arrays.stream(requests).noneMatch(item -> item.getTicketType().equals(TicketTypeEnum.ADULT));
-        if (notValidTickets) {
-            throw new InvalidPurchaseException();
-        }
         Arrays.stream(requests).forEach(ticketRequest -> {
             int cost = getTicketPrice(ticketRequest.getTicketType());
             calculateTotal(cost * ticketRequest.getNoOfTickets());
+
         });
 
         //todo: calculate seats after payment process
