@@ -12,7 +12,9 @@ public class TicketPurchaseRequest {
 
     public TicketPurchaseRequest(long accountId, TicketRequest[] ticketRequests) {
         if (accountId < 1) {
-            throw new InvalidPurchaseException();
+            throw new InvalidPurchaseException("Invalid accountId");
+        } else if (ticketRequests.length < 1) {
+            throw new InvalidPurchaseException("Invalid number of TicketRequests");
         }
         this.accountId = accountId;
         this.ticketRequests = ticketRequests;
