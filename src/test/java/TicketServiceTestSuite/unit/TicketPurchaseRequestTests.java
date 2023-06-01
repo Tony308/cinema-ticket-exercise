@@ -53,7 +53,7 @@ public class TicketPurchaseRequestTests {
         assertThrows(InvalidPurchaseException.class, () -> {
             when(ticketRequest.getTicketType()).thenReturn(TicketTypeEnum.CHILD);
             ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{ticketRequest});
-        }, "No Adult ticket");
+        });
     }
 
 
@@ -63,5 +63,20 @@ public class TicketPurchaseRequestTests {
         ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{ticketRequest});
         assertEquals(1, ticketPurchaseRequest.getAccountId());
         assertEquals(1, ticketPurchaseRequest.getTicketTypeRequests().length);
+    }
+
+    @Test
+    public void givenExceedsTicketLimitsThenThrowException() {
+        assertThrows(InvalidPurchaseException.class, () -> {
+            when(ticketRequest.getNoOfTickets()).thenReturn(21);
+            when(ticketRequest.getTicketType()).thenReturn(TicketTypeEnum.ADULT);
+            ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{ticketRequest});
+        });
+
+        assertThrows(InvalidPurchaseException.class, () -> {
+            when(ticketRequest.getNoOfTickets()).thenReturn(20);
+            when(ticketRequest.getTicketType()).thenReturn(TicketTypeEnum.ADULT);
+            ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{ticketRequest, ticketRequest});
+        });
     }
 }

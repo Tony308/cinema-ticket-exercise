@@ -21,7 +21,8 @@ public class TicketRequestTests {
                 Arguments.of(TicketTypeEnum.CHILD, 1, 1, TicketTypeEnum.CHILD),
                 Arguments.of(TicketTypeEnum.CHILD, 2, 2, TicketTypeEnum.CHILD),
                 Arguments.of(TicketTypeEnum.INFANT, 1, 1, TicketTypeEnum.INFANT),
-                Arguments.of(TicketTypeEnum.INFANT, 2, 2, TicketTypeEnum.INFANT)
+                Arguments.of(TicketTypeEnum.INFANT, 2, 2, TicketTypeEnum.INFANT),
+                Arguments.of(TicketTypeEnum.INFANT, 20, 20, TicketTypeEnum.INFANT)
         );
     }
     @ParameterizedTest(name = "TicketTypeEnum: {0}, tickets:{1}, expected: {2}, {3}")
@@ -34,16 +35,17 @@ public class TicketRequestTests {
 
     static Stream<Arguments> TicketRequestUnitTestErrorData() {
         return Stream.of(
-                Arguments.of(TicketTypeEnum.ADULT, 0, "Given invalid number of tickets then, throw InvalidTicketRequestException"),
-                Arguments.of(TicketTypeEnum.ADULT, -1, "Given invalid number of tickets then, throw InvalidTicketRequestException"),
-                Arguments.of(TicketTypeEnum.ADULT, -2, "Given invalid number of tickets then, throw InvalidTicketRequestException")
+                Arguments.of(TicketTypeEnum.ADULT, 0),
+                Arguments.of(TicketTypeEnum.ADULT, -1),
+                Arguments.of(TicketTypeEnum.ADULT, -2),
+                Arguments.of(TicketTypeEnum.ADULT, 21)
+
         );
     }
     @ParameterizedTest(name = "TicketTypeEnum: {0}, tickets:{1}")
     @MethodSource(value = "TicketRequestUnitTestErrorData")
-    public void givenTicketRequestsHandleErrors(TicketTypeEnum type, int noOfTickets, String message) {
-        assertThrows(InvalidTicketRequestException.class, () -> new TicketRequest(type, noOfTickets),
-                message);
+    public void givenTicketRequestsHandleErrors(TicketTypeEnum type, int noOfTickets) {
+        assertThrows(InvalidTicketRequestException.class, () -> new TicketRequest(type, noOfTickets));
     }
 
 }

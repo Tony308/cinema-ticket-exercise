@@ -13,7 +13,6 @@ public class TicketPurchaseRequest {
     private final TicketRequest[] ticketRequests;
 
     public TicketPurchaseRequest(long accountId, TicketRequest[] ticketRequests) {
-
         if (accountId < 1) {
             throw new InvalidPurchaseException("Invalid accountId");
         }
@@ -23,6 +22,10 @@ public class TicketPurchaseRequest {
         boolean notValidTickets = Arrays.stream(ticketRequests).noneMatch(item -> item.getTicketType().equals(TicketTypeEnum.ADULT));
         if (notValidTickets) {
             throw new InvalidPurchaseException("InvalidTicketPurchaseRequest, must have at least 1 TicketRequest of type: " + TicketTypeEnum.ADULT);
+        }
+        int noTickets = Arrays.stream(ticketRequests).mapToInt(TicketRequest::getNoOfTickets).sum();
+        if (20 < noTickets) {
+            throw new InvalidPurchaseException("InvalidTicketPurchaseRequest. Exceeded the max number of tickets per purchase request.");
         }
         this.accountId = accountId;
         this.ticketRequests = ticketRequests;

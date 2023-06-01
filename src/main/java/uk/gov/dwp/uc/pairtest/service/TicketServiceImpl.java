@@ -37,7 +37,6 @@ public class TicketServiceImpl implements TicketService {
 //         * 4. calculate seats
 //         * 5. process seatService
         TicketRequest[] requests = ticketPurchaseRequest.getTicketTypeRequests();
-
         Arrays.stream(requests).forEach(ticketRequest -> {
             int cost = getTicketPrice(ticketRequest.getTicketType());
             calculateTotal(cost * ticketRequest.getNoOfTickets());
