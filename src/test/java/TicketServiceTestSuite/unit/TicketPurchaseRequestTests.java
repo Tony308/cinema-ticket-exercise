@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +44,8 @@ public class TicketPurchaseRequestTests {
     @ParameterizedTest(name = "AccountId: {0}")
     @MethodSource(value = "invalidAccountIdData")
     public void givenInvalidAccountIdThenThrowInvalidPurchaseException(int accountId) {
+        when(ticketRequest.getNoOfTickets()).thenReturn(1);
+        when(ticketRequest.getTicketType()).thenReturn(TicketTypeEnum.ADULT);
         assertThrows(InvalidPurchaseException.class, () -> {
             ticketPurchaseRequest = new TicketPurchaseRequest(accountId, new TicketRequest[]{ticketRequest});
         });
@@ -60,6 +63,7 @@ public class TicketPurchaseRequestTests {
     @Test
     public void givenValidInputThenCreateTicketPurchaseRequest() {
         when(ticketRequest.getTicketType()).thenReturn(TicketTypeEnum.ADULT);
+        when(ticketRequest.getNoOfTickets()).thenReturn(1);
         ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{ticketRequest});
         assertEquals(1, ticketPurchaseRequest.getAccountId());
         assertEquals(1, ticketPurchaseRequest.getTicketTypeRequests().length);
@@ -77,6 +81,23 @@ public class TicketPurchaseRequestTests {
             when(ticketRequest.getNoOfTickets()).thenReturn(20);
             when(ticketRequest.getTicketType()).thenReturn(TicketTypeEnum.ADULT);
             ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{ticketRequest, ticketRequest});
+        });
+    }
+
+    @Test
+    public void givenTooManyInfantTicketsThenThrowException() {
+        assertThrows(InvalidPurchaseException.class, () -> {
+            TicketRequest adults = mock(TicketRequest.class);
+            TicketRequest infants = mock(TicketRequest.class);
+
+            given(adults.getTicketType()).willReturn(TicketTypeEnum.ADULT);
+            given(infants.getTicketType()).willReturn(TicketTypeEnum.INFANT);
+            given(adults.getNoOfTickets()).willReturn(1);
+            given(infants.getNoOfTickets()).willReturn(2);
+
+            ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{
+                    adults, infants
+            });
         });
     }
 }

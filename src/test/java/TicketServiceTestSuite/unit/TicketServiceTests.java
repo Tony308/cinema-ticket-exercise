@@ -96,26 +96,40 @@ public class TicketServiceTests {
             when(ticketRequest.getNoOfTickets()).thenReturn(20);
             when(ticketRequest.getTicketType()).thenReturn(TicketTypeEnum.ADULT);
             ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{ticketRequest, ticketRequest});
-            
+
         });
     }
 
     @Test
     public void givenTicketLimitThenReturnCorrectCostAndSeats() {
-        TicketRequest eins = mock(TicketRequest.class);
-        TicketRequest zwei = mock(TicketRequest.class);
+        TicketRequest adult = mock(TicketRequest.class);
+        TicketRequest child = mock(TicketRequest.class);
+        TicketRequest infant = mock(TicketRequest.class);
 
-        given(eins.getNoOfTickets()).willReturn(10);
-        given(zwei.getNoOfTickets()).willReturn(10);
+        given(adult.getNoOfTickets()).willReturn(10);
+        given(child.getNoOfTickets()).willReturn(10);
+        given(infant.getNoOfTickets()).willReturn(10);
 
-        given(eins.getTicketType()).willReturn(TicketTypeEnum.ADULT);
-        given(zwei.getTicketType()).willReturn(TicketTypeEnum.CHILD);
+        given(adult.getTicketType()).willReturn(TicketTypeEnum.ADULT);
+        given(child.getTicketType()).willReturn(TicketTypeEnum.CHILD);
+        given(infant.getTicketType()).willReturn(TicketTypeEnum.INFANT);
+
         given(ticketPurchaseRequest.getTicketTypeRequests()).willReturn(new TicketRequest[]{
-                eins, zwei
+                adult, child, infant
         });
         ticketService.purchaseTickets(ticketPurchaseRequest);
         assertEquals(20, ticketService.getNoSeats());
         assertEquals(300, ticketService.getTotal());
     }
 
+    @Test
+    public void givenTooManyInfantTicketsThanThrowException() {
+        assertThrows(InvalidPurchaseException.class, () -> {
+            ticketPurchaseRequest = new TicketPurchaseRequest(1, new TicketRequest[]{
+               new TicketRequest(TicketTypeEnum.ADULT,2),
+               new TicketRequest(TicketTypeEnum.INFANT,3)
+            });
+           ticketService.purchaseTickets(ticketPurchaseRequest);
+        });
+    }
 }
