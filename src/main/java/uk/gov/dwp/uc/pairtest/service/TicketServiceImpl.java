@@ -1,6 +1,7 @@
 package uk.gov.dwp.uc.pairtest.service;
 
-import thirdparty.seatbooking.SeatReservationService;
+import thirdparty.paymentgateway.TicketPaymentServiceImpl;
+import thirdparty.seatbooking.SeatReservationServiceImpl;
 import uk.gov.dwp.uc.pairtest.domain.TicketPurchaseRequest;
 import uk.gov.dwp.uc.pairtest.domain.TicketRequest;
 import uk.gov.dwp.uc.pairtest.domain.TicketTypeEnum;
@@ -14,8 +15,7 @@ public class TicketServiceImpl implements TicketService {
 
     private long total;
     private int noSeats;
-    private SeatReservationService seatReservationService;
-    private TicketServiceImpl ticketService;
+
 
     public TicketServiceImpl(long total, int noSeats) {
         this.total = total;
@@ -29,25 +29,25 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public void purchaseTickets(TicketPurchaseRequest ticketPurchaseRequest) throws InvalidPurchaseException {
 
-//        todo:
-//         1. process ticket
-//              -
-//         * 2. calculate total
-//         * 3. process payment
-//         * 4. calculate seats
-//         * 5. process seatService
+        processPurchaseRequest(ticketPurchaseRequest);
+        long accountId = ticketPurchaseRequest.getAccountId();
+        TicketPaymentServiceImpl paymentService = new TicketPaymentServiceImpl();
+        paymentService.makePayment(accountId, (int) this.getTotal());
+
+        SeatReservationServiceImpl seatReservationService = new SeatReservationServiceImpl();
+        seatReservationService.reserveSeat(accountId, this.getNoSeats());
+    }
+
+    private void processPurchaseRequest(TicketPurchaseRequest ticketPurchaseRequest) {
         TicketRequest[] requests = ticketPurchaseRequest.getTicketTypeRequests();
         Arrays.stream(requests).forEach(ticketRequest -> {
             int cost = getTicketPrice(ticketRequest.getTicketType());
             calculateTotal(cost * ticketRequest.getNoOfTickets());
-            //todo: 4. calculate seats after payment process
             boolean requireSeats = !ticketRequest.getTicketType().equals(TicketTypeEnum.INFANT);
             if (requireSeats) {
                 calculateSeats(ticketRequest.getNoOfTickets());
             }
         });
-        //todo: 3. process payment
-
     }
 
     private int getTicketPrice(TicketTypeEnum type) {

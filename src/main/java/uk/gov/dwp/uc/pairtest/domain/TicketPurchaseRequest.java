@@ -3,7 +3,6 @@ package uk.gov.dwp.uc.pairtest.domain;
 import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 /**
  * Should be an Immutable Object
@@ -14,6 +13,12 @@ public class TicketPurchaseRequest {
     private final TicketRequest[] ticketRequests;
 
     public TicketPurchaseRequest(long accountId, TicketRequest[] ticketRequests) {
+        dataValidation(accountId, ticketRequests);
+        this.accountId = accountId;
+        this.ticketRequests = ticketRequests;
+    }
+
+    private void dataValidation(long accountId, TicketRequest[] ticketRequests) {
         int adultTickets = Arrays.stream(ticketRequests).filter((ticketRequest -> ticketRequest.getTicketType().equals(TicketTypeEnum.ADULT))).mapToInt(TicketRequest::getNoOfTickets).sum();
         int infantTickets = Arrays.stream(ticketRequests).filter((ticketRequest -> ticketRequest.getTicketType().equals(TicketTypeEnum.INFANT))).mapToInt(TicketRequest::getNoOfTickets).sum();
 
@@ -27,17 +32,18 @@ public class TicketPurchaseRequest {
         if (notValidTickets) {
             throw new InvalidPurchaseException("Must have at least 1 TicketRequest of type: " + TicketTypeEnum.ADULT);
         }
-        int noTickets = Arrays.stream(ticketRequests).mapToInt(TicketRequest::getNoOfTickets).sum();
+        int noTickets = Arrays.stream(ticketRequests)
+                .filter((ticketRequest -> ticketRequest.getTicketType().equals(TicketTypeEnum.CHILD)))
+                .mapToInt(TicketRequest::getNoOfTickets)
+                .sum()
+                + adultTickets;
+
         if (20 < noTickets) {
             throw new InvalidPurchaseException("Exceeded the max number of tickets per purchase request.");
         }
-
         if (adultTickets < infantTickets) {
             throw new InvalidPurchaseException("Not enough adult tickets to infant tickets ratio.");
         }
-
-        this.accountId = accountId;
-        this.ticketRequests = ticketRequests;
     }
 
     public long getAccountId() {

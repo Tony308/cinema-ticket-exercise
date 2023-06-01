@@ -29,18 +29,19 @@ public class TicketServiceIntegrationTests {
     @Test
     public void basicIntegrationTest() {
         ticketRequests = new TicketRequest[]{
-                new TicketRequest(TicketTypeEnum.ADULT, 5),
-                new TicketRequest(TicketTypeEnum.CHILD, 5),
-                new TicketRequest(TicketTypeEnum.INFANT, 5)
+                new TicketRequest(TicketTypeEnum.ADULT, 10),
+                new TicketRequest(TicketTypeEnum.CHILD, 10),
+                new TicketRequest(TicketTypeEnum.INFANT, 10)
         };
+
         ticketPurchaseRequest = new TicketPurchaseRequest(1, ticketRequests);
         ticketService.purchaseTickets(ticketPurchaseRequest);
-        assertEquals(150, ticketService.getTotal());
-        assertEquals(10, ticketService.getNoSeats());
+        assertEquals(300, ticketService.getTotal());
+        assertEquals(20, ticketService.getNoSeats());
     }
 
     @Test
-    public void given21TicketRequestThenThrowException() {
+    public void given21TicketPurchaseRequestThenThrowException() {
         assertThrows(InvalidTicketRequestException.class, () -> {
             ticketRequests = new TicketRequest[]{
                     new TicketRequest(TicketTypeEnum.ADULT, 21)
@@ -56,6 +57,17 @@ public class TicketServiceIntegrationTests {
             ticketRequests = new TicketRequest[]{
                     new TicketRequest(TicketTypeEnum.ADULT, 20),
                     new TicketRequest(TicketTypeEnum.CHILD, 1)
+            };
+            ticketPurchaseRequest = new TicketPurchaseRequest(1, ticketRequests);
+            ticketService.purchaseTickets(ticketPurchaseRequest);
+        });
+    }
+    @Test
+    public void givenTooManyInfantTicketsThenThrowException() {
+        assertThrows(InvalidPurchaseException.class, () -> {
+            ticketRequests = new TicketRequest[]{
+                    new TicketRequest(TicketTypeEnum.ADULT, 9),
+                    new TicketRequest(TicketTypeEnum.INFANT, 10)
             };
             ticketPurchaseRequest = new TicketPurchaseRequest(1, ticketRequests);
             ticketService.purchaseTickets(ticketPurchaseRequest);
